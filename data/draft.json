@@ -1,0 +1,18 @@
+{
+  "blue": {
+    "top": "Ornn",
+    "jungle": "Jarvan IV",
+    "mid": "Orianna",
+    "adc": "Jinx",
+    "support": "Nautilus"
+  },
+  "red": {
+    "top": "Renekton",
+    "jungle": "Sejuani",
+    "mid": "Syndra",
+    "adc": "Kai'Sa",
+    "support": "Rakan"
+  },
+  "defaultSelected": "blue:jungle",
+  "defaultStrategy": "target_access_first"
+}

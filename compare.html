@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hermod Compare Alternatives</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <div class="eyebrow">Hermod · Draft Structure Prototype</div>
+    <h1>Compare alternatives</h1>
+    <p class="sub">Start from the completed 10-pick draft. Replace any one slot, then query the whole graph to see what changes globally—without turning the comparison into two champion scores.</p>
+
+    <nav class="page-nav" aria-label="Primary pages">
+      <a id="analysis-page-link" class="page-link" href="index.html">← Draft analysis</a>
+      <a class="page-link active" href="compare.html">Compare alternatives</a>
+    </nav>
+
+    <div class="compare-page-layout">
+      <aside class="panel">
+        <h2>Baseline draft</h2>
+        <div class="team-title"><span>BLUE</span><span>choose any slot</span></div>
+        <div id="blue-team"></div>
+        <div class="team-title"><span>RED</span><span>choose any slot</span></div>
+        <div id="red-team"></div>
+      </aside>
+
+      <section class="panel">
+        <div class="hero">
+          <div>
+            <div class="eyebrow">Graph mutation</div>
+            <h2 id="compare-title">Choose a replacement</h2>
+            <div class="meta">One slot changes; the whole draft graph is re-evaluated.</div>
+          </div>
+          <div class="badge">Global delta, not score</div>
+        </div>
+
+        <div id="pick-preview" class="pick-preview" aria-live="polite"></div>
+
+        <div class="compare-controls compare-controls-two">
+          <label>Slot
+            <select id="slot-select"></select>
+          </label>
+          <label>Alternative pick
+            <select id="pick-select"></select>
+          </label>
+        </div>
+
+        <button id="query-button" class="action-button" type="button">Query changed graph</button>
+        <div id="comparison-output" class="comparison-output" aria-live="polite"></div>
+      </section>
+    </div>
+    <p class="asset-note">Champion portraits are loaded from Riot Games Data Dragon. This prototype is not endorsed by Riot Games.</p>
+  </main>
+  <script src="graph.js"></script>
+  <script src="compare.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hermod Draft Analysis</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <div class="eyebrow">Hermod · Draft Structure Prototype</div>
+    <h1>Draft analysis</h1>
+    <p class="sub">Choose a 10-pick draft, then click any champion to query the structural consequences of that choice in the current composition.</p>
+
+    <nav class="page-nav" aria-label="Primary pages">
+      <a class="page-link active" href="index.html">Draft analysis</a>
+      <a id="compare-page-link" class="page-link primary" href="compare.html">Compare alternatives →</a>
+    </nav>
+
+    <nav class="toolbar" aria-label="Analysis views">
+      <button class="tab" data-view="overview">Draft setup</button>
+      <button class="tab active" data-view="structure">Choice structure</button>
+      <button class="tab" data-view="strategy">Strategy lens</button>
+      <button class="tab" data-view="motifs">Meta motifs</button>
+      <button class="tab" data-view="narrative">Narrative</button>
+    </nav>
+
+    <div class="layout">
+      <aside class="panel">
+        <h2>Current 10-pick draft</h2>
+        <div class="team-title"><span>BLUE</span><span>click to analyze</span></div>
+        <div id="blue-team"></div>
+        <div class="team-title"><span>RED</span><span>click to analyze</span></div>
+        <div id="red-team"></div>
+      </aside>
+
+      <section id="main-panel" class="panel" aria-live="polite"></section>
+    </div>
+    <p class="asset-note">Champion portraits are loaded from Riot Games Data Dragon. This prototype is not endorsed by Riot Games.</p>
+  </main>
+  <script src="graph.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+# Hermod draft ontology assertions — deliberately pre-schema
+# These are illustrative domain assertions, not a final ontology.
+
+# ------------------------------------------------------------
+# DRAFT STATE
+# ------------------------------------------------------------
+BLUE_TOP IS ORNN
+BLUE_JUNGLE IS JARVAN
+BLUE_MID IS ORIANNA
+BLUE_ADC IS JINX
+BLUE_SUPPORT IS NAUTILUS
+
+RED_TOP IS RENEKTON
+RED_JUNGLE IS SEJUANI
+RED_MID IS SYNDRA
+RED_ADC IS KAISA
+RED_SUPPORT IS RAKAN
+
+POPPY IS_AVAILABLE
+LEE_SIN IS_AVAILABLE
+TWO_BAN_SLOTS REMAIN
+SUPPORT_COUNTERPICK IS_AVAILABLE
+
+# ------------------------------------------------------------
+# MECHANISMS
+# ------------------------------------------------------------
+JARVAN PROVIDES TARGET_ACCESS
+JARVAN PROVIDES FORCED_ENGAGE
+ORNN PROVIDES FRONTLINE
+ORNN PROVIDES ENGAGE
+ORIANNA PROVIDES AREA_FOLLOWUP
+JINX PROVIDES SUSTAINED_DAMAGE
+NAUTILUS PROVIDES LOCKDOWN
+NAUTILUS PROVIDES ENGAGE
+
+RAKAN PROVIDES MOBILE_ENGAGE
+SEJUANI PROVIDES LOCKDOWN
+SYNDRA PROVIDES RANGE_PRESSURE
+
+# ------------------------------------------------------------
+# CONDITIONS
+# ------------------------------------------------------------
+JINX_DAMAGE REQUIRES ATTACK_WINDOW
+JARVAN_COMMIT REQUIRES FOLLOWUP
+ORIANNA_FOLLOWUP REQUIRES DELIVERY
+
+# ------------------------------------------------------------
+# AFFORDANCES
+# ------------------------------------------------------------
+NAUTILUS_LOCKDOWN ENABLES ATTACK_WINDOW
+ORNN_FRONTLINE ENABLES ATTACK_WINDOW
+JARVAN_ENGAGE ENABLES ORIANNA_DELIVERY
+ORIANNA_DELIVERY ENABLES AREA_FOLLOWUP
+TARGET_ACCESS ENABLES BACKLINE_PRESSURE
+
+# ------------------------------------------------------------
+# EXPOSURES / RESPONSE BRANCHES
+# ------------------------------------------------------------
+PICK_JARVAN OPENS_RESPONSE POPPY
+PICK_JARVAN OPENS_RESPONSE LEE_SIN
+RAKAN_ENGAGE THREATENS JINX_ATTACK_WINDOW
+SEJUANI_LOCKDOWN THREATENS JINX_ATTACK_WINDOW
+
+# ------------------------------------------------------------
+# RESOURCE DEMANDS
+# ------------------------------------------------------------
+JARVAN_VS_POPPY_REJECTION REQUIRES BAN_POPPY
+BAN_POPPY CONSUMES BAN_SLOT
+SUPPORT_CONTROL CONSUMES BAN_SLOT
+
+# ------------------------------------------------------------
+# ACTOR REALIZABILITY
+# ------------------------------------------------------------
+BLUE_JUNGLER HAS_HIGH_PROFICIENCY JARVAN
+BLUE_JUNGLER REJECTS JARVAN_VS_POPPY
+BLUE_JUNGLER ACCEPTS JARVAN_VS_LEE_SIN
+
+# ------------------------------------------------------------
+# ADAPTATION / CONTEXT
+# ------------------------------------------------------------
+POPPY_UNAVAILABLE REDUCES JARVAN_RESPONSE_EXPOSURE
+LEE_SIN_UNAVAILABLE REDUCES JARVAN_RESPONSE_EXPOSURE
+HEAVY_DISENGAGE REDUCES JARVAN_COMMIT_VALUE
+
+# ------------------------------------------------------------
+# PROPAGATION
+# ------------------------------------------------------------
+JARVAN_ENGAGE ENABLES ORIANNA_DELIVERY
+ORIANNA_DELIVERY ENABLES AREA_FOLLOWUP
+AREA_FOLLOWUP ENABLES JINX_ATTACK_WINDOW
+JINX_ATTACK_WINDOW ENABLES DAMAGE_CONVERSION
+
+MID_PUSH ENABLES FOG_ACCESS
+FOG_ACCESS ENABLES CROSS_MAP_ACCESS
+CROSS_MAP_ACCESS ENABLES NUMBERS_ADVANTAGE
