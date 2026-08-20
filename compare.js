@@ -31,7 +31,7 @@ function renderStrategyStatus() {
   const host = el("active-strategy-pill");
   if (!host) return;
   const lens = G.STRATEGY_LENSES[activeStrategy];
-  host.innerHTML = `<span>Active strategy</span><strong>${lens.short}</strong><code>${lens.label}</code>`;
+  //host.innerHTML = `<span>Active strategy</span><strong>${lens.short}</strong><code>${lens.label}</code>`;
 }
 
 const portrait = (name, cls = "champion-portrait") => `<img class="${cls}" src="${G.championImage(name)}" alt="${name} champion portrait" loading="lazy" />`;
