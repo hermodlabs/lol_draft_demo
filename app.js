@@ -2,7 +2,20 @@ const G = window.HermodGraph;
 let draft = G.draftFromSearch(window.location.search);
 let selected = { team: "blue", role: "jungle" };
 let activeView = "structure";
-let activeStrategy = "target_access_first";
+const STRATEGY_STORAGE_KEY = "hermod.strategyLens.v1";
+const VALID_STRATEGIES = new Set(["target_access_first", "draft_optionality", "protect_carry"]);
+
+function readInitialStrategy() {
+  const fromUrl = new URLSearchParams(window.location.search).get("strategy");
+  if (VALID_STRATEGIES.has(fromUrl)) return fromUrl;
+  try {
+    const saved = window.localStorage.getItem(STRATEGY_STORAGE_KEY);
+    if (VALID_STRATEGIES.has(saved)) return saved;
+  } catch (_) {}
+  return "target_access_first";
+}
+
+let activeStrategy = readInitialStrategy();
 
 const strategies = {
   target_access_first: {
@@ -45,8 +58,24 @@ const portrait = (name, cls = "champion-portrait") => `<img class="${cls}" src="
 function selectedName() { return draft[selected.team][selected.role]; }
 
 function updateLinks() {
-  const query = G.draftSearch(draft, { slot: `${selected.team}:${selected.role}` });
+  const query = G.draftSearch(draft, { slot: `${selected.team}:${selected.role}`, strategy: activeStrategy });
   el("compare-page-link").href = `compare.html${query}`;
+}
+
+function renderStrategyStatus() {
+  const host = el("active-strategy-pill");
+  if (!host) return;
+  const lens = strategies[activeStrategy];
+  host.innerHTML = `<span>Active strategy</span><strong>${lens.title}</strong><code>${lens.label}</code>`;
+}
+
+function persistStrategy() {
+  try { window.localStorage.setItem(STRATEGY_STORAGE_KEY, activeStrategy); } catch (_) {}
+  const url = new URL(window.location.href);
+  url.searchParams.set("strategy", activeStrategy);
+  window.history.replaceState({}, "", url);
+  updateLinks();
+  renderStrategyStatus();
 }
 
 function renderDraft() {
@@ -71,6 +100,9 @@ function renderDraft() {
 }
 
 function contextualExtras() {
+  const lensConsequences = G.strategyConsequences(draft, selected.team, activeStrategy, selectedName());
+  if (lensConsequences.length) return lensConsequences;
+
   const evaln = G.globalEvaluation(draft);
   const own = evaln.derived[selected.team].statements;
   return own.filter(x => {
@@ -86,7 +118,7 @@ function contextualExtras() {
 function renderStructure() {
   const name = selectedName();
   const s = G.CHAMPIONS[name];
-  const compareHref = `compare.html${G.draftSearch(draft, { slot: `${selected.team}:${selected.role}` })}`;
+  const compareHref = `compare.html${G.draftSearch(draft, { slot: `${selected.team}:${selected.role}`, strategy: activeStrategy })}`;
   const consequences = contextualExtras();
   const consequenceBody = consequences.length
     ? list(consequences)
@@ -106,6 +138,7 @@ function renderStructure() {
 
     <section class="global-consequences">
       <div class="section-heading"><h3>Global consequences</h3><span>what this choice changes elsewhere in the 10-pick graph</span></div>
+      <div class="strategy-context"><strong>Strategy lens:</strong> ${strategies[activeStrategy].title} · ${strategies[activeStrategy].simple}</div>
       <div class="global-consequence-body">${consequenceBody}</div>
     </section>
 
@@ -233,6 +266,7 @@ function bindDynamic() {
   }));
   document.querySelectorAll(".strategy-btn").forEach(b => b.addEventListener("click", () => {
     activeStrategy = b.dataset.strategy;
+    persistStrategy();
     renderMain();
   }));
 }
@@ -249,5 +283,6 @@ if (initialSlot && initialSlot.includes(":")) {
   if (draft[team] && draft[team][role]) selected = { team, role };
 }
 
+persistStrategy();
 renderDraft();
 renderMain();

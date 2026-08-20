@@ -1,6 +1,21 @@
 const G = window.HermodGraph;
 let draft = G.draftFromSearch(window.location.search);
 const params = new URLSearchParams(window.location.search);
+const STRATEGY_STORAGE_KEY = "hermod.strategyLens.v1";
+const VALID_STRATEGIES = new Set(["target_access_first", "draft_optionality", "protect_carry"]);
+
+function readInitialStrategy() {
+  const fromUrl = params.get("strategy");
+  if (VALID_STRATEGIES.has(fromUrl)) return fromUrl;
+  try {
+    const saved = window.localStorage.getItem(STRATEGY_STORAGE_KEY);
+    if (VALID_STRATEGIES.has(saved)) return saved;
+  } catch (_) {}
+  return "target_access_first";
+}
+
+let activeStrategy = readInitialStrategy();
+try { window.localStorage.setItem(STRATEGY_STORAGE_KEY, activeStrategy); } catch (_) {}
 let selectedSlot = params.get("slot") || "blue:jungle";
 if (!selectedSlot.includes(":")) selectedSlot = "blue:jungle";
 let [selectedTeam, selectedRole] = selectedSlot.split(":");
@@ -11,6 +26,14 @@ if (!draft[selectedTeam] || !draft[selectedTeam][selectedRole]) {
 let alternative = firstAlternative(selectedTeam, selectedRole, draft[selectedTeam][selectedRole]);
 
 const el = id => document.getElementById(id);
+
+function renderStrategyStatus() {
+  const host = el("active-strategy-pill");
+  if (!host) return;
+  const lens = G.STRATEGY_LENSES[activeStrategy];
+  host.innerHTML = `<span>Active strategy</span><strong>${lens.short}</strong><code>${lens.label}</code>`;
+}
+
 const portrait = (name, cls = "champion-portrait") => `<img class="${cls}" src="${G.championImage(name)}" alt="${name} champion portrait" loading="lazy" />`;
 
 function championUsedElsewhere(name, currentTeam, currentRole) {
@@ -26,7 +49,7 @@ function firstAlternative(team, role, current) {
 }
 
 function updateAnalysisLink() {
-  el("analysis-page-link").href = `index.html${G.draftSearch(draft, { slot: selectedSlot })}`;
+  el("analysis-page-link").href = `index.html${G.draftSearch(draft, { slot: selectedSlot, strategy: activeStrategy })}`;
 }
 
 function renderDraft() {
@@ -105,15 +128,17 @@ function semanticCard(title, diff) {
 
 function globalConsequencesSection(result) {
   const changed = {
-    added: result.globalChanges.added,
-    removed: result.globalChanges.removed,
+    added: result.strategyGlobalChanges.added,
+    removed: result.strategyGlobalChanges.removed,
     unchanged: []
   };
+  const lens = G.STRATEGY_LENSES[activeStrategy];
   return `
     <section class="global-consequences compare-global">
-      <div class="section-heading"><h3>Global consequences</h3><span>composition-wide effects of this one-slot mutation</span></div>
+      <div class="section-heading"><h3>Global consequences</h3><span>composition-wide effects interpreted through the active strategy</span></div>
+      <div class="strategy-context"><strong>Strategy lens:</strong> ${lens.short} <span class="strategy-code">${lens.label}</span></div>
       <div class="change-legend"><span><strong>+</strong> introduced / increased</span><span><strong>−</strong> removed / decreased</span><span>no symbol = preserved inside semantic sections</span></div>
-      <div class="global-consequence-body">${changeList(changed, { includeUnchanged: false, emptyText: "No high-salience global consequence changed for this substitution." })}</div>
+      <div class="global-consequence-body">${changeList(changed, { includeUnchanged: false, emptyText: "This substitution does not change a high-salience consequence under the active strategy lens." })}</div>
     </section>`;
 }
 
@@ -158,7 +183,7 @@ function motifSection(result) {
 function renderComparison() {
   const after = G.cloneDraft(draft);
   after[selectedTeam][selectedRole] = alternative;
-  const result = G.compareDrafts(draft, after, selectedSlot);
+  const result = G.compareDrafts(draft, after, selectedSlot, activeStrategy);
   el("compare-title").textContent = `${result.beforeName} → ${result.afterName}`;
   renderPickPreview(result.beforeName, result.afterName);
 
@@ -204,6 +229,7 @@ el("pick-select").addEventListener("change", e => {
 
 el("query-button").addEventListener("click", renderComparison);
 
+renderStrategyStatus();
 renderDraft();
 renderControls();
 renderComparison();

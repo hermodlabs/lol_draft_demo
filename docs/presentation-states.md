@@ -128,3 +128,8 @@ Still supplied by: Ornn, Orianna
    - motifs introduced or removed by the graph mutation
 
 `+` and `−` never mean good/bad. Strategy decides desirability later.
+
+
+## Persistent strategy state
+
+The selected Strategy Lens persists across presentation states and across the Analysis / Compare Alternatives page boundary. All views may display the active strategy context, while Global Consequences must be generated through that lens. Strategy changes interpretation/relevance; it does not mutate the underlying World/domain graph.

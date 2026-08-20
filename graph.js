@@ -440,6 +440,134 @@ function derivedStatements(draft, team) {
   return { statements, motifs: [...new Set(motifs)] };
 }
 
+
+const STRATEGY_LENSES = {
+  target_access_first: {
+    label: "TARGET_ACCESS_FIRST",
+    short: "Get onto the targets that matter"
+  },
+  draft_optionality: {
+    label: "DRAFT_OPTIONALITY",
+    short: "Keep good choices open"
+  },
+  protect_carry: {
+    label: "PROTECT_PRIMARY_CARRY",
+    short: "Keep the main damage dealer safe"
+  }
+};
+
+function strategyConsequences(draft, team, strategyId, focusName = null) {
+  const strategy = STRATEGY_LENSES[strategyId] ? strategyId : "target_access_first";
+  const own = team;
+  const enemy = otherTeam(team);
+  const focus = focusName && CHAMPIONS[focusName] ? CHAMPIONS[focusName] : null;
+  const out = [];
+
+  const ownAccess = [...new Set([
+    ...providersForSignal(draft, own, "targetAccess"),
+    ...providersForSignal(draft, own, "dive"),
+    ...providersForSignal(draft, own, "engage")
+  ])];
+  const enemyImmobile = providersForSignal(draft, enemy, "immobileCarry");
+  const enemyDefense = [...new Set([
+    ...providersForSignal(draft, enemy, "protection"),
+    ...providersForSignal(draft, enemy, "disengage"),
+    ...providersForSignal(draft, enemy, "antiDive")
+  ])];
+  const engageProviders = providersForSignal(draft, own, "engage");
+  const responseProviders = providersForSignal(draft, own, "responseExposure");
+  const banDemandProviders = providersForSignal(draft, own, "banDemand");
+  const pressureProviders = [...new Set([
+    ...providersForSignal(draft, own, "lanePriorityDemand"),
+    ...providersForSignal(draft, own, "jungleAttentionDemand")
+  ])];
+  const weaksideProviders = providersForSignal(draft, own, "weakside");
+  const carries = providersForSignal(draft, own, "carry");
+  const protectionProviders = [...new Set([
+    ...providersForSignal(draft, own, "protection"),
+    ...providersForSignal(draft, own, "frontline"),
+    ...providersForSignal(draft, own, "lockdown"),
+    ...providersForSignal(draft, own, "disengage")
+  ])];
+  const enemyAccess = [...new Set([
+    ...providersForSignal(draft, enemy, "targetAccess"),
+    ...providersForSignal(draft, enemy, "dive"),
+    ...providersForSignal(draft, enemy, "engage")
+  ])];
+
+  if (strategy === "target_access_first") {
+    if (focus) {
+      const contributesAccess = ["targetAccess", "dive", "engage"].some(sig => (focus.signals?.[sig] || 0) > 0);
+      if (contributesAccess) {
+        out.push(`${focusName} directly contributes to ${TEAM_LABEL[team]}'s ability to start contact or reach priority targets.`);
+      } else {
+        out.push(`${focusName} does not add a direct access route, so this lens makes ${joinNames(ownAccess.filter(x => x !== focusName))} more important for reaching priority targets.`);
+      }
+    }
+    if (enemyImmobile.length && ownAccess.length) {
+      out.push(`${joinNames(ownAccess)} can pressure the low-mobility carries ${joinNames(enemyImmobile)}; this is the main structure this lens rewards.`);
+    }
+    if (enemyDefense.length && ownAccess.length) {
+      out.push(`${joinNames(enemyDefense)} can protect or disengage against that access, so reaching the target is not the same as converting the fight.`);
+    }
+    if (engageProviders.length === 1) {
+      out.push(`${engageProviders[0]} is the only modeled initiation source, making target access fragile if that route is denied.`);
+    } else if (engageProviders.length >= 2) {
+      out.push(`Initiation can come from ${joinNames(engageProviders)}, so the team has more than one way to begin the target-access sequence.`);
+    }
+  }
+
+  if (strategy === "draft_optionality") {
+    if (focus && (focus.signals?.responseExposure || 0) > 0) {
+      out.push(`${focusName} opens explicit opponent response branches; this lens treats those new branches as a flexibility cost.`);
+    } else if (focus) {
+      out.push(`${focusName} does not add an explicit modeled counter-response branch, which preserves more response freedom under this lens.`);
+    }
+    if (banDemandProviders.length) {
+      out.push(`${joinNames(banDemandProviders)} can create protection-ban demand, which can consume draft resources that could have been spent on other roles.`);
+    }
+    if (responseProviders.length) {
+      out.push(`The opponent gains explicit response branches against ${joinNames(responseProviders)}; optionality falls when those branches must be covered with bans or later picks.`);
+    }
+    if (pressureProviders.length >= 2) {
+      out.push(`${joinNames(pressureProviders)} can demand jungle attention at the same time, reducing freedom over where early resources can be allocated.`);
+    }
+    if (weaksideProviders.length && pressureProviders.length) {
+      out.push(`${joinNames(weaksideProviders)} can absorb lower cover, preserving jungle allocation flexibility for the rest of the map.`);
+    }
+  }
+
+  if (strategy === "protect_carry") {
+    if (carries.length) {
+      out.push(`This lens treats ${joinNames(carries)} as the ${carries.length === 1 ? "damage source" : "damage sources"} whose safe operating window matters most.`);
+    }
+    if (focus) {
+      const contributesProtection = ["protection", "frontline", "lockdown", "disengage", "antiDive"].some(sig => (focus.signals?.[sig] || 0) > 0);
+      if (contributesProtection) {
+        out.push(`${focusName} contributes directly to protecting or stabilizing the carry's attack window.`);
+      } else {
+        out.push(`${focusName} does not directly add protection, so the carry remains more dependent on ${joinNames(protectionProviders.filter(x => x !== focusName))}.`);
+      }
+    }
+    if (protectionProviders.length) {
+      out.push(`Protection and space for the backline can come from ${joinNames(protectionProviders)}.`);
+    }
+    if (enemyAccess.length && carries.length) {
+      out.push(`${joinNames(enemyAccess)} can reach or engage onto ${joinNames(carries)}, so this lens treats surviving that access as a central draft problem.`);
+    }
+    if (teamNames(draft, own).includes("Jinx")) {
+      const attackWindowProviders = [...new Set([
+        ...providersForSignal(draft, own, "lockdown"),
+        ...providersForSignal(draft, own, "frontline"),
+        ...providersForSignal(draft, own, "protection")
+      ])].filter(x => x !== "Jinx");
+      out.push(`Jinx's stable attack window is supported by ${joinNames(attackWindowProviders)}.`);
+    }
+  }
+
+  return [...new Set(out)].filter(Boolean);
+}
+
 function globalEvaluation(draft) {
   const blueCounts = signalCounts(draft, "blue");
   const redCounts = signalCounts(draft, "red");
@@ -494,7 +622,7 @@ function structuralSourceChanges(beforeDraft, afterDraft, team) {
   }).filter(x => x.added.length || x.removed.length);
 }
 
-function compareDrafts(beforeDraft, afterDraft, changedSlot) {
+function compareDrafts(beforeDraft, afterDraft, changedSlot, strategyId = "target_access_first") {
   const [team, role] = changedSlot.split(":");
   const beforeName = beforeDraft[team][role];
   const afterName = afterDraft[team][role];
@@ -519,6 +647,10 @@ function compareDrafts(beforeDraft, afterDraft, changedSlot) {
   const enemyDerived = diffSet(beforeEval.derived[otherTeam(team)].statements, afterEval.derived[otherTeam(team)].statements);
   const ownMotifs = diffSet(beforeEval.derived[team].motifs, afterEval.derived[team].motifs);
   const enemyMotifs = diffSet(beforeEval.derived[otherTeam(team)].motifs, afterEval.derived[otherTeam(team)].motifs);
+  const strategyGlobalChanges = diffSet(
+    strategyConsequences(beforeDraft, team, strategyId, beforeName),
+    strategyConsequences(afterDraft, team, strategyId, afterName)
+  );
 
   return {
     team, role, beforeName, afterName,
@@ -530,6 +662,8 @@ function compareDrafts(beforeDraft, afterDraft, changedSlot) {
       removed: [...ownDerived.removed, ...enemyDerived.removed],
       unchanged: [...ownDerived.unchanged, ...enemyDerived.unchanged]
     },
+    strategyId,
+    strategyGlobalChanges,
     motifChanges: {
       added: [...ownMotifs.added, ...enemyMotifs.added],
       removed: [...ownMotifs.removed, ...enemyMotifs.removed],
@@ -541,5 +675,5 @@ function compareDrafts(beforeDraft, afterDraft, changedSlot) {
 window.HermodGraph = {
   DEFAULT_DRAFT, ROLE_LABEL, TEAM_LABEL, ROLE_POOLS, CHAMPIONS,
   cloneDraft, draftFromSearch, draftSearch, signalCounts, globalEvaluation, compareDrafts,
-  championImage, providersForSignal, structuralSourceChanges
+  championImage, providersForSignal, structuralSourceChanges, strategyConsequences, STRATEGY_LENSES
 };

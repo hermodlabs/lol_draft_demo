@@ -175,3 +175,43 @@ label select { width:100%; margin-top:6px; }
 .draft-editor-row select option:disabled { color: var(--muted); }
 .draft-rule { margin: 0 0 14px; border: 1px solid var(--border); background: var(--panel2); color: var(--muted); border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.45; }
 .draft-rule strong { color: var(--text); }
+
+/* Active strategy context persists across analysis and comparison. */
+.strategy-context {
+  margin: 8px 0 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel2);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.strategy-context strong { color: var(--text); }
+.strategy-code {
+  margin-left: 6px;
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: .05em;
+}
+
+.active-strategy-pill {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+  margin:-8px 0 18px;
+  color:var(--muted);
+  font-size:12px;
+}
+.active-strategy-pill strong { color:var(--text); font-size:13px; }
+.active-strategy-pill code {
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:3px 7px;
+  color:var(--accent);
+  background:var(--panel);
+  font-family:inherit;
+  font-size:10px;
+  letter-spacing:.04em;
+}

@@ -87,5 +87,14 @@ Champion portraits use Riot Games Data Dragon square champion assets. This proto
 - Alternative pick changes rerender immediately; no extra query click is required.
 
 
-## Draft setup rule
-Draft Setup enforces unique champion picks. Once a champion is selected in any of the 10 slots, that champion is disabled in every other slot.
+## Strategy lens state and consequences
+
+The Strategy Lens is application state, not a one-tab decoration. Selecting a lens now:
+
+- persists while switching among Draft setup, Choice structure, Meta motifs, and Narrative;
+- persists when navigating to Compare alternatives and back;
+- is encoded in the URL and mirrored in local browser storage;
+- is shown outside the Strategy Lens page as an **Active strategy** indicator; and
+- changes the Global Consequences interpretation.
+
+The same graph can therefore produce different high-salience consequences under `TARGET_ACCESS_FIRST`, `DRAFT_OPTIONALITY`, and `PROTECT_PRIMARY_CARRY`. The underlying domain facts and structural motifs do not change merely because the strategy changes; the strategy changes which consequences matter and how they are interpreted.
